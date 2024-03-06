@@ -1,0 +1,36 @@
+{
+  "name": "mesto",
+  "version": "1.0.0",
+  "description": "training application",
+  "scripts": {
+    "dev": "npm run start -w packages/frontend"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "npm": ">=10.2.4",
+    "node": ">=v20.11.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AleksandrMenshchikov/mesto-full-app.git"
+  },
+  "keywords": [
+    "javascript",
+    "typescript",
+    "nodejs",
+    "expressjs",
+    "reactjs",
+    "mongodb"
+  ],
+  "author": {
+    "name": "Aleksandr Menshchikov",
+    "email": "aleksandr.menshchikov1982@gmail.com"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AleksandrMenshchikov/mesto-full-app/issues"
+  },
+  "homepage": "https://github.com/AleksandrMenshchikov/mesto-full-app#readme"
+}
