@@ -1,11 +1,26 @@
 import { NextFunction, Request, Response } from 'express';
-import { Schema } from 'mongoose';
+import jwt from 'jsonwebtoken';
+import * as process from 'process';
+import { Unauthorized } from '../errors/unauthorized';
 import { IRequest } from '../types/interfaces';
+import { TPayload } from '../types/types';
 
-export function temporaryAuth(req: Request, _res: Response, next: NextFunction) {
-  (req as IRequest).user = {
-    _id: '65eaa30dceb78667780ce1d4' as unknown as Schema.Types.ObjectId,
-  };
+export function auth(req: Request, res: Response, next: NextFunction) {
+  const { authorization } = req.headers;
+
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    throw new Unauthorized('Необходима авторизация');
+  }
+
+  const token = authorization.replace('Bearer ', '');
+  let payload;
+
+  try {
+    payload = jwt.verify(token, process.env.JWT_SECRET as string) as TPayload;
+    (req as IRequest).user = payload;
+  } catch (err) {
+    throw new Unauthorized('Необходима авторизация');
+  }
 
   next();
 }

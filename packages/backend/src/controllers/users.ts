@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { User } from '../models/user';
 import {
-  DATA, MESSAGE, responseTexts, statuses,
+  DATA, responseTexts, statuses,
 } from '../constants';
 import { NotFound } from '../errors/notFound';
 import { TUser } from '../types/types';
@@ -15,34 +16,101 @@ export async function createUser(req: Request, res: Response, next: NextFunction
       name,
       about,
       avatar,
+      email,
+      password,
     }: TUser = req.body;
 
-    if (!name || !about || !avatar) {
+    if (!email || !password) {
       throw new BadRequest(responseTexts['Переданы некорректные данные при создании пользователя']);
+    } else if (password && password.length < 6) {
+      throw new BadRequest(responseTexts['Поле "password" должно быть больше 5 символов']);
     }
+
+    const hash = await bcrypt.hash(password, 10);
 
     const data = await User.create({
       name,
       about,
       avatar,
+      email,
+      password: hash,
     });
 
-    res.status(statuses.CREATED)
-      .send({ [DATA]: data });
+    const {
+      password: p,
+      ...rest
+    } = data.toJSON();
+
+    const token = jwt.sign(
+      { _id: data._id },
+      process.env.JWT_SECRET as string,
+    );
+
+    res
+      .cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7, // 1 час * 24 * 7
+        httpOnly: true,
+        sameSite: true,
+      })
+      .status(statuses.CREATED)
+      .send({ [DATA]: rest });
   } catch (err) {
-    if (err instanceof mongoose.Error) {
-      res.status(statuses.BAD_REQUEST)
-        .send({ [MESSAGE]: err.message });
-    } else {
-      next(err);
+    next(err);
+  }
+}
+
+export async function login(req: Request, res: Response, next: NextFunction) {
+  try {
+    const {
+      email,
+      password,
+    }: TUser = req.body;
+
+    if (!email || !password) {
+      throw new BadRequest(responseTexts['Переданы некорректные данные при авторизации']);
+    } else if (password && password.length < 6) {
+      throw new BadRequest(responseTexts['Поле "password" должно быть больше 5 символов']);
     }
+
+    const data = await User.findOne({ email })
+      .select('+password');
+
+    if (!data) {
+      throw new NotFound(responseTexts['Пользователь по указанному email не найден']);
+    } else {
+      const matched = await bcrypt.compare(password, data.password);
+
+      if (matched) {
+        const {
+          password: p,
+          ...rest
+        } = data.toJSON();
+
+        const token = jwt.sign(
+          { _id: data._id },
+          process.env.JWT_SECRET as string,
+        );
+
+        res
+          .cookie('jwt', token, {
+            maxAge: 3600000 * 24 * 7, // 1 час * 24 * 7
+            httpOnly: true,
+            sameSite: true,
+          })
+          .status(statuses.OK)
+          .send({ [DATA]: rest });
+      } else {
+        throw new NotFound(responseTexts['Пользователь по указанному password не найден']);
+      }
+    }
+  } catch (err) {
+    next(err);
   }
 }
 
 export async function getUser(req: Request, res: Response, next: NextFunction) {
   try {
-    const { userId } = req.params;
-    const data = await User.findById(userId);
+    const data = await User.findById((req as IRequest).user._id);
 
     if (!data) {
       throw new NotFound(responseTexts['Пользователь по указанному _id не найден']);
@@ -51,12 +119,7 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
         .send({ [DATA]: data });
     }
   } catch (err) {
-    if (err instanceof mongoose.Error) {
-      res.status(statuses.BAD_REQUEST)
-        .send({ [MESSAGE]: err.message });
-    } else {
-      next(err);
-    }
+    next(err);
   }
 }
 
@@ -97,12 +160,7 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
         .send({ [DATA]: data });
     }
   } catch (err) {
-    if (err instanceof mongoose.Error) {
-      res.status(statuses.BAD_REQUEST)
-        .send({ [MESSAGE]: err.message });
-    } else {
-      next(err);
-    }
+    next(err);
   }
 }
 
@@ -132,11 +190,6 @@ export async function updateAvatar(req: Request, res: Response, next: NextFuncti
         .send({ [DATA]: data });
     }
   } catch (err) {
-    if (err instanceof mongoose.Error) {
-      res.status(statuses.BAD_REQUEST)
-        .send({ [MESSAGE]: err.message });
-    } else {
-      next(err);
-    }
+    next(err);
   }
 }

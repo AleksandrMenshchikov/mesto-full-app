@@ -1,8 +1,6 @@
 import { Request } from 'express';
-import { Schema } from 'mongoose';
+import { TPayload } from './types';
 
 export interface IRequest extends Request {
-  user: {
-    _id: Schema.Types.ObjectId
-  };
+  user: TPayload;
 }

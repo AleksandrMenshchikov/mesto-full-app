@@ -7,7 +7,9 @@ import limiter from './security-helpers/expressRateLimit';
 import cors from './security-helpers/cors';
 import { router } from './routes';
 import { handleErrors } from './controllers/errors';
-import { temporaryAuth } from './middlewares/auth';
+import { auth } from './middlewares/auth';
+import { createUser, login } from './controllers/users';
+import { usersRouter } from './routes/users';
 
 mongoose.connect(process.env.DB_URI as string)
   .then(() => console.log('Mongoose connected to database'))
@@ -21,10 +23,11 @@ app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors);
 
-app.use(temporaryAuth);
+app.post('/signup', createUser);
+app.post('/signin', login);
 
+app.use(auth);
 app.use(router);
-
 app.use(handleErrors);
 
 const { PORT = 4000 } = process.env;

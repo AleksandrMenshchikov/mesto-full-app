@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import mongoose from 'mongoose';
 import {
-  DATA, MESSAGE, responseTexts, statuses,
+  DATA, responseTexts, statuses,
 } from '../constants';
 import { Card } from '../models/card';
 import { IRequest } from '../types/interfaces';
@@ -31,12 +30,7 @@ export async function createCard(req: Request, res: Response, next: NextFunction
     res.status(statuses.CREATED)
       .send({ [DATA]: data });
   } catch (err) {
-    if (err instanceof mongoose.Error) {
-      res.status(statuses.BAD_REQUEST)
-        .send({ [MESSAGE]: err.message });
-    } else {
-      next(err);
-    }
+    next(err);
   }
 }
 
@@ -62,12 +56,7 @@ export async function deleteCard(req: Request, res: Response, next: NextFunction
         .send({ [DATA]: data });
     }
   } catch (err) {
-    if (err instanceof mongoose.Error) {
-      res.status(statuses.BAD_REQUEST)
-        .send({ [MESSAGE]: err.message });
-    } else {
-      next(err);
-    }
+    next(err);
   }
 }
 
@@ -92,12 +81,7 @@ export async function putLike(req: Request, res: Response, next: NextFunction) {
         .send({ [DATA]: data });
     }
   } catch (err) {
-    if (err instanceof mongoose.Error) {
-      res.status(statuses.BAD_REQUEST)
-        .send({ [MESSAGE]: err.message });
-    } else {
-      next(err);
-    }
+    next(err);
   }
 }
 
@@ -122,11 +106,6 @@ export async function deleteLike(req: Request, res: Response, next: NextFunction
         .send({ [DATA]: data });
     }
   } catch (err) {
-    if (err instanceof mongoose.Error) {
-      res.status(statuses.BAD_REQUEST)
-        .send({ [MESSAGE]: err.message });
-    } else {
-      next(err);
-    }
+    next(err);
   }
 }
