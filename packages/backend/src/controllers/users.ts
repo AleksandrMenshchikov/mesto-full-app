@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { User } from '../models/user';
-import { DATA, MESSAGE } from '../constants';
+import {
+  DATA, MESSAGE, responseTexts, statuses,
+} from '../constants';
 import { NotFound } from '../errors/notFound';
 import { TUser } from '../types/types';
 import { IRequest } from '../types/interfaces';
@@ -16,7 +18,7 @@ export async function createUser(req: Request, res: Response, next: NextFunction
     }: TUser = req.body;
 
     if (!name || !about || !avatar) {
-      throw new BadRequest('Переданы некорректные данные при создании пользователя');
+      throw new BadRequest(responseTexts['Переданы некорректные данные при создании пользователя']);
     }
 
     const data = await User.create({
@@ -25,11 +27,11 @@ export async function createUser(req: Request, res: Response, next: NextFunction
       avatar,
     });
 
-    res.status(201)
+    res.status(statuses.CREATED)
       .send({ [DATA]: data });
   } catch (err) {
     if (err instanceof mongoose.Error) {
-      res.status(400)
+      res.status(statuses.BAD_REQUEST)
         .send({ [MESSAGE]: err.message });
     } else {
       next(err);
@@ -43,14 +45,14 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
     const data = await User.findById(userId);
 
     if (!data) {
-      throw new NotFound('Пользователь по указанному _id не найден');
+      throw new NotFound(responseTexts['Пользователь по указанному _id не найден']);
     } else {
-      res.status(200)
+      res.status(statuses.OK)
         .send({ [DATA]: data });
     }
   } catch (err) {
     if (err instanceof mongoose.Error) {
-      res.status(400)
+      res.status(statuses.BAD_REQUEST)
         .send({ [MESSAGE]: err.message });
     } else {
       next(err);
@@ -61,7 +63,7 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
 export async function getUsers(_req: Request, res: Response, next: NextFunction) {
   try {
     const data = await User.find();
-    res.status(200)
+    res.status(statuses.OK)
       .send({ [DATA]: data });
   } catch (err) {
     next(err);
@@ -77,7 +79,7 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
     }: TUser = req.body;
 
     if (!name || !about) {
-      throw new BadRequest('Переданы некорректные данные при обновлении профиля');
+      throw new BadRequest(responseTexts['Переданы некорректные данные при обновлении профиля']);
     }
 
     const data = await User.findByIdAndUpdate(userId, {
@@ -89,14 +91,14 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
     });
 
     if (!data) {
-      throw new NotFound('Пользователь по указанному _id не найден');
+      throw new NotFound(responseTexts['Пользователь по указанному _id не найден']);
     } else {
-      res.status(200)
+      res.status(statuses.OK)
         .send({ [DATA]: data });
     }
   } catch (err) {
     if (err instanceof mongoose.Error) {
-      res.status(400)
+      res.status(statuses.BAD_REQUEST)
         .send({ [MESSAGE]: err.message });
     } else {
       next(err);
@@ -111,7 +113,7 @@ export async function updateAvatar(req: Request, res: Response, next: NextFuncti
     }: TUser = req.body;
 
     if (!avatar) {
-      throw new BadRequest('Переданы некорректные данные при обновлении аватара');
+      throw new BadRequest(responseTexts['Переданы некорректные данные при обновлении аватара']);
     }
 
     const { _id: userId } = (req as IRequest).user;
@@ -124,14 +126,14 @@ export async function updateAvatar(req: Request, res: Response, next: NextFuncti
     });
 
     if (!data) {
-      throw new NotFound('Пользователь по указанному _id не найден');
+      throw new NotFound(responseTexts['Пользователь по указанному _id не найден']);
     } else {
-      res.status(200)
+      res.status(statuses.OK)
         .send({ [DATA]: data });
     }
   } catch (err) {
     if (err instanceof mongoose.Error) {
-      res.status(400)
+      res.status(statuses.BAD_REQUEST)
         .send({ [MESSAGE]: err.message });
     } else {
       next(err);
