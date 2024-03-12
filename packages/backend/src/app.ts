@@ -9,7 +9,7 @@ import { router } from './routes';
 import { handleErrors } from './controllers/errors';
 import { auth } from './middlewares/auth';
 import { createUser, login } from './controllers/users';
-import { usersRouter } from './routes/users';
+import { errorLogger, requestLogger } from './middlewares/logger';
 
 mongoose.connect(process.env.DB_URI as string)
   .then(() => console.log('Mongoose connected to database'))
@@ -23,11 +23,12 @@ app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors);
 
+app.use(requestLogger);
 app.post('/signup', createUser);
 app.post('/signin', login);
-
 app.use(auth);
 app.use(router);
+app.use(errorLogger);
 app.use(handleErrors);
 
 const { PORT = 4000 } = process.env;

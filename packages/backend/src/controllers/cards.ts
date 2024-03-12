@@ -7,6 +7,7 @@ import { IRequest } from '../types/interfaces';
 import { TCard } from '../types/types';
 import { NotFound } from '../errors/notFound';
 import { BadRequest } from '../errors/badRequest';
+import { Forbidden } from '../errors/forbidden';
 
 export async function createCard(req: Request, res: Response, next: NextFunction) {
   try {
@@ -47,11 +48,15 @@ export async function getCards(_req: Request, res: Response, next: NextFunction)
 export async function deleteCard(req: Request, res: Response, next: NextFunction) {
   try {
     const { cardId } = req.params;
-    const data = await Card.findByIdAndDelete(cardId);
+    const data = await Card.findById(cardId);
 
     if (!data) {
       throw new NotFound(responseTexts['Карточка с указанным _id не найдена']);
+    } else if (data.owner.toString() !== (req as IRequest).user._id as unknown as string) {
+      throw new Forbidden('Попытка удалить чужую карточку;');
     } else {
+      await Card.findByIdAndDelete(cardId);
+
       res.status(statuses.OK)
         .send({ [DATA]: data });
     }

@@ -9,6 +9,8 @@ import { NotFound } from '../errors/notFound';
 import { TUser } from '../types/types';
 import { IRequest } from '../types/interfaces';
 import { BadRequest } from '../errors/badRequest';
+import { Unauthorized } from '../errors/unauthorized';
+import { Conflict } from '../errors/conflict';
 
 export async function createUser(req: Request, res: Response, next: NextFunction) {
   try {
@@ -24,6 +26,12 @@ export async function createUser(req: Request, res: Response, next: NextFunction
       throw new BadRequest(responseTexts['Переданы некорректные данные при создании пользователя']);
     } else if (password && password.length < 6) {
       throw new BadRequest(responseTexts['Поле "password" должно быть больше 5 символов']);
+    }
+
+    const response = await User.findOne({ email });
+
+    if (response) {
+      throw new Conflict('При регистрации указан email, который уже существует на сервере');
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -76,7 +84,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       .select('+password');
 
     if (!data) {
-      throw new NotFound(responseTexts['Пользователь по указанному email не найден']);
+      throw new Unauthorized(responseTexts['Передан неверный логин']);
     } else {
       const matched = await bcrypt.compare(password, data.password);
 
@@ -100,7 +108,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
           .status(statuses.OK)
           .send({ [DATA]: rest });
       } else {
-        throw new NotFound(responseTexts['Пользователь по указанному password не найден']);
+        throw new Unauthorized(responseTexts['Передан неверный пароль']);
       }
     }
   } catch (err) {
@@ -135,7 +143,7 @@ export async function getUsers(_req: Request, res: Response, next: NextFunction)
 
 export async function updateProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    const { _id: userId } = (req as IRequest).user;
+    const { _id } = (req as IRequest).user;
     const {
       name,
       about,
@@ -145,7 +153,7 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
       throw new BadRequest(responseTexts['Переданы некорректные данные при обновлении профиля']);
     }
 
-    const data = await User.findByIdAndUpdate(userId, {
+    const data = await User.findByIdAndUpdate(_id, {
       name,
       about,
     }, {
@@ -174,9 +182,9 @@ export async function updateAvatar(req: Request, res: Response, next: NextFuncti
       throw new BadRequest(responseTexts['Переданы некорректные данные при обновлении аватара']);
     }
 
-    const { _id: userId } = (req as IRequest).user;
+    const { _id } = (req as IRequest).user;
 
-    const data = await User.findByIdAndUpdate(userId, {
+    const data = await User.findByIdAndUpdate(_id, {
       avatar,
     }, {
       new: true,
