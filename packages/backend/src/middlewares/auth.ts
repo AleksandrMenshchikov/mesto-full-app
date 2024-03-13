@@ -1,18 +1,20 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import * as process from 'process';
 import { Unauthorized } from '../errors/unauthorized';
 import { IRequest } from '../types/interfaces';
 import { TPayload } from '../types/types';
+import { JWT } from '../constants';
 
 export function auth(req: Request, _res: Response, next: NextFunction) {
-  const { authorization } = req.headers;
+  const { cookie } = req.headers;
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  const token = cookie?.split('; ')
+    .find((elem) => elem.includes(JWT))
+    ?.split('=')[1];
+
+  if (!token) {
     throw new Unauthorized('Необходима авторизация');
   }
-
-  const token = authorization.replace('Bearer ', '');
 
   try {
     (req as IRequest).user = jwt.verify(token, process.env.JWT_SECRET as string) as TPayload;
