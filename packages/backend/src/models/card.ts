@@ -24,7 +24,11 @@ const cardSchema = new Schema<TCard>(
       required: [true, 'Поле "owner" обязательное для заполнения'],
     },
     likes: {
-      type: [Schema.Types.ObjectId],
+      type: [{
+        type: Schema
+          .Types.ObjectId,
+        ref: 'user',
+      }],
       default: [],
     },
     createdAt: {
