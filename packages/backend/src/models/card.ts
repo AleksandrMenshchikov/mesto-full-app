@@ -31,12 +31,11 @@ const cardSchema = new Schema<TCard>(
       }],
       default: [],
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
-  { versionKey: false },
+  {
+    versionKey: false,
+    timestamps: true,
+  },
 );
 
 export const Card = model<TCard>('card', cardSchema, 'cards');

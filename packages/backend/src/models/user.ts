@@ -41,7 +41,10 @@ const userSchema = new Schema<TUser>(
       minlength: [6, 'Поле "password" должно быть больше 5 символов'],
     },
   },
-  { versionKey: false },
+  {
+    versionKey: false,
+    timestamps: true,
+  },
 );
 
 export const User = model<TUser>('user', userSchema, 'users');
