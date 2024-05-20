@@ -27,6 +27,11 @@ app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors);
 
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер упал');
+  }, 0);
+});
 app.use(requestLogger);
 app.post('/signup', validateCreateUser(), createUser);
 app.post('/signin', validateLogin(), login);

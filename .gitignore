@@ -18,3 +18,5 @@ node_modules
 # Typescript build
 */**/dist
 */**/build
+
+*/**/.env

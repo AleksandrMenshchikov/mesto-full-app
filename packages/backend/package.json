@@ -5,6 +5,7 @@
     "dev": "NODE_ENV=development && ts-node-dev src/app.ts",
     "build": "rimraf dist && tsc",
     "start": "NODE_ENV=production && node dist/app.js",
+    "prod": "npm run build && npm run start",
     "lint": "npx eslint --fix src/**/*.ts"
   },
   "license": "ISC",
