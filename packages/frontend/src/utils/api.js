@@ -161,7 +161,7 @@ class Api {
 
 // Замените на адрес вашего бэкенда
 const api = new Api(`${process.env.NODE_ENV !== 'development' 
-  ? 'https://api.mesto-app.nomoredomainswork.ru/'
+  ? 'https://api.mesto-app.website.ru'
   : 'http://localhost:4000'}`);
 
 export default api;
