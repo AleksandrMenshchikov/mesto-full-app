@@ -2,6 +2,8 @@ import cors from 'cors';
 
 const whitelist: string[] = [
   'http://localhost:3000',
+  'https://mesto-app.website',
+  'https://www.mesto-app.website',
 ];
 
 const corsOptions = {
