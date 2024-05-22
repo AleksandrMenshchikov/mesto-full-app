@@ -134,12 +134,12 @@ function App() {
   }) {
     api
       .register(email, password)
-      .then((res) => {
+      .then(() => {
         setTooltipStatus('success');
         setIsInfoToolTipOpen(true);
         history.push('/signin');
       })
-      .catch((err) => {
+      .catch(() => {
         setTooltipStatus('fail');
         setIsInfoToolTipOpen(true);
       });
@@ -151,7 +151,7 @@ function App() {
   }) {
     api
       .login(email, password)
-      .then((res) => {
+      .then(() => {
         setIsLoggedIn(true);
         setEmail(email);
         return api.getAppInfo();
@@ -161,7 +161,7 @@ function App() {
         setCards(cardData.data);
         history.push('/');
       })
-      .catch((err) => {
+      .catch(() => {
         setTooltipStatus('fail');
         setIsInfoToolTipOpen(true);
       });
