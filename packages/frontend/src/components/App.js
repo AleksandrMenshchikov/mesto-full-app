@@ -36,27 +36,21 @@ function App() {
   const history = useHistory();
 
   React.useEffect(() => {
-    const token = localStorage.getItem('jwt');
-    if (token) {
-      api
-        .checkToken(token)
-        .then((res) => {
-          console.log(res);
-          api.setToken(token);
-          setEmail(res.email);
-          setIsLoggedIn(true);
-          return api.getAppInfo();
-        })
-        .then(([cardData, userData]) => {
-          setCurrentUser(userData);
-          setCards(cardData);
-          history.push('/');
-        })
-        .catch((err) => {
-          localStorage.removeItem('jwt');
-          console.log(err);
-        });
-    }
+    api
+      .checkToken()
+      .then((res) => {
+        setEmail(res.email);
+        setIsLoggedIn(true);
+        return api.getAppInfo();
+      })
+      .then(([cardData, userData]) => {
+        setCurrentUser(userData.data);
+        setCards(cardData.data);
+        history.push('/');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, [history]);
 
   function handleEditProfileClick() {
@@ -87,7 +81,7 @@ function App() {
     api
       .setUserInfo(userUpdate)
       .then((newUserData) => {
-        setCurrentUser(newUserData);
+        setCurrentUser(newUserData.data);
         closeAllPopups();
       })
       .catch((err) => console.log(err));
@@ -97,7 +91,7 @@ function App() {
     api
       .setUserAvatar(avatarUpdate)
       .then((newUserData) => {
-        setCurrentUser(newUserData);
+        setCurrentUser(newUserData.data);
         closeAllPopups();
       })
       .catch((err) => console.log(err));
@@ -109,7 +103,7 @@ function App() {
       .changeLikeCardStatus(card._id, !isLiked)
       .then((newCard) => {
         setCards((cards) =>
-          cards.map((c) => (c._id === card._id ? newCard : c))
+          cards.map((c) => (c._id === card._id ? newCard.data : c))
         );
       })
       .catch((err) => console.log(err));
@@ -128,7 +122,7 @@ function App() {
     api
       .addCard(newCard)
       .then((newCardFull) => {
-        setCards([newCardFull, ...cards]);
+        setCards([newCardFull.data, ...cards]);
         closeAllPopups();
       })
       .catch((err) => console.log(err));
@@ -160,6 +154,11 @@ function App() {
       .then((res) => {
         setIsLoggedIn(true);
         setEmail(email);
+        return api.getAppInfo();
+      })
+      .then(([cardData, userData]) => {
+        setCurrentUser(userData.data);
+        setCards(cardData.data);
         history.push('/');
       })
       .catch((err) => {
@@ -169,11 +168,10 @@ function App() {
   }
 
   function onSignOut() {
-
-    localStorage.removeItem('jwt');
-    setIsLoggedIn(false);
-
-    history.push('/signin');
+    api.signout()
+      .then(() => {
+        history.push('/signin');
+      });
   }
 
   return (

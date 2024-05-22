@@ -107,7 +107,7 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await User.findById((req as IRequest).user._id);
 
-    if (!data || data._id.toString() !== req.params.userId) {
+    if (!data) {
       throw new NotFound(responseTexts['Пользователь по указанному _id не найден']);
     } else {
       res.status(statuses.OK)
@@ -179,4 +179,11 @@ export async function updateAvatar(req: Request, res: Response, next: NextFuncti
   } catch (err) {
     next(err);
   }
+}
+
+export function signout(_: Request, res: Response) {
+  res
+    .clearCookie('jwt')
+    .status(statuses.OK)
+    .json({ [DATA]: 'ok' });
 }

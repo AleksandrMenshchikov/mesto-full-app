@@ -7,19 +7,13 @@ class Api {
     this._address = address;
   }
 
-  setToken(token) {
-    this._token = token;
-  }
-
   getAppInfo() {
     return Promise.all([this.getCardList(), this.getUserInfo()]);
   }
 
   getCardList() {
     return fetch(`${this._address}/cards`, {
-      headers: {
-        'Authorization': `Bearer ${this._token}`,
-      },
+      credentials: `include`,
     })
       .then(getResponse);
   }
@@ -31,13 +25,13 @@ class Api {
     return fetch(`${this._address}/cards`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this._token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name,
         link,
       }),
+      credentials: `include`,
     })
       .then(getResponse);
   }
@@ -46,9 +40,9 @@ class Api {
     return fetch(`${this._address}/cards/${cardId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${this._token}`,
         'Content-Type': 'application/json',
       },
+      credentials: `include`,
     })
       .then(getResponse);
   }
@@ -56,9 +50,9 @@ class Api {
   getUserInfo() {
     return fetch(`${this._address}/users/me`, {
       headers: {
-        'Authorization': `Bearer ${this._token}`,
         'Content-Type': 'application/json',
       },
+      credentials: `include`,
     })
       .then(getResponse);
   }
@@ -70,13 +64,13 @@ class Api {
     return fetch(`${this._address}/users/me`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${this._token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name,
         about,
       }),
+      credentials: `include`,
     })
       .then(getResponse);
   }
@@ -85,12 +79,12 @@ class Api {
     return fetch(`${this._address}/users/me/avatar`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${this._token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         avatar,
       }),
+      credentials: `include`,
     })
       .then(getResponse);
   }
@@ -100,9 +94,9 @@ class Api {
     return fetch(`${this._address}/cards/${cardId}/likes`, {
       method: like ? 'PUT' : 'DELETE',
       headers: {
-        'Authorization': `Bearer ${this._token}`,
         'Content-Type': 'application/json',
       },
+      credentials: `include`,
     })
       .then(getResponse);
   }
@@ -130,23 +124,19 @@ class Api {
       body: JSON.stringify({
         email,
         password
-      })
+      }),
+      credentials: `include`,
     })
       .then(getResponse)
-      .then((data) => {
-        this.setToken(data.token);
-        localStorage.setItem('jwt', data.token);
-        return data;
-      });
   }
 
-  checkToken(token) {
+  checkToken() {
     return fetch(`${this._address}/users/me`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }
+      },
+      credentials: `include`,
     })
       .then(getResponse);
   }
@@ -157,10 +147,18 @@ class Api {
     })
       .then(getResponse);
   }
+
+  signout() {
+    return fetch(`${this._address}/users/signout`, {
+      method: 'GET',
+      credentials: `include`,
+    })
+      .then(getResponse);
+  }
 }
 
 // Замените на адрес вашего бэкенда
-const api = new Api(`${process.env.NODE_ENV !== 'development' 
+const api = new Api(`${process.env.NODE_ENV !== 'development'
   ? 'https://api.mesto-app.website'
   : 'http://localhost:4000'}`);
 
